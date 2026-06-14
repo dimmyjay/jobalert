@@ -33,6 +33,8 @@ export default function RegisterPage() {
     email: string,
     photoURL?: string | null
   ) => {
+    if (!db) throw new Error("Database not initialized");
+    
     await set(ref(db, `users/${uid}`), {
       uid,
       name,
@@ -48,6 +50,11 @@ export default function RegisterPage() {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
+
+    if (!auth || !db) {
+        setError("Authentication or Database service unavailable.");
+        return;
+    }
 
     setLoading(true);
     setError("");
@@ -92,6 +99,11 @@ export default function RegisterPage() {
   };
 
   const handleGoogleRegister = async () => {
+    if (!auth || !db) {
+        setError("Authentication or Database service unavailable.");
+        return;
+    }
+
     setGoogleLoading(true);
     setError("");
 
