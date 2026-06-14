@@ -38,7 +38,6 @@ export default function AccountPage() {
 
     // 🔒 Check authentication first
     useEffect(() => {
-        // Safety check: if auth is not initialized, stop loading and show error or redirect
         if (!auth) {
             console.error("Firebase Auth is not initialized.");
             setAuthLoading(false);
@@ -48,7 +47,6 @@ export default function AccountPage() {
 
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (!currentUser) {
-                // Not logged in, redirect to login
                 router.push('/login?redirect=/account');
                 return;
             }
@@ -62,10 +60,16 @@ export default function AccountPage() {
     // Load only the logged-in user's subscriptions
     useEffect(() => {
         if (!user) return;
+        if (!db) {
+            setError("Database connection unavailable.");
+            setLoading(false);
+            return;
+        }
 
         const loadSubscriptions = async () => {
             try {
                 setLoading(true);
+                // Now TypeScript knows db is not null because of the check above
                 const dbRef = ref(db);
                 const snapshot = await get(child(dbRef, 'jobAlertSubscriptions'));
 
@@ -97,6 +101,8 @@ export default function AccountPage() {
 
     // 🔒 Delete subscription (with ownership check)
     const handleDeleteSubscription = async (subscriptionId: string) => {
+        if (!db) return;
+        
         // Verify ownership
         const sub = subscriptions.find((s) => s.id === subscriptionId);
         if (!sub || sub.email !== user?.email) {
@@ -117,6 +123,8 @@ export default function AccountPage() {
 
     // 🔒 Toggle subscription active status (with ownership check)
     const handleToggleActive = async (subscriptionId: string, currentStatus: boolean) => {
+        if (!db) return;
+
         // Verify ownership
         const sub = subscriptions.find((s) => s.id === subscriptionId);
         if (!sub || sub.email !== user?.email) {
