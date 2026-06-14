@@ -190,6 +190,8 @@ function filterJobs(jobs: Job[], preferences: JobPreferences): MatchedJob[] {
  * Get previously sent job IDs for a user
  */
 async function getSentJobIds(email: string): Promise<string[]> {
+    if (!db) return [];
+    
     try {
         const dbRef = ref(db);
         // Changed path from userSentJobs to alertLogs/sentJobs
@@ -212,6 +214,8 @@ async function getSentJobIds(email: string): Promise<string[]> {
  * Mark jobs as sent for a user
  */
 async function markJobsAsSent(email: string, jobIds: string[]): Promise<void> {
+    if (!db) return;
+
     try {
         const emailKey = email.replace(/\./g, ',');
         const updates: { [key: string]: any } = {};
@@ -345,6 +349,8 @@ function escapeHtml(text: string): string {
  * Fetch jobs from Firebase
  */
 async function fetchJobsFromFirebase(): Promise<Job[]> {
+    if (!db) return [];
+
     try {
         const dbRef = ref(db);
         const snapshot = await get(child(dbRef, 'jobs'));
