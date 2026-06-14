@@ -64,6 +64,8 @@ export interface JobMatch {
 // ==========================================
 
 export async function fetchAllJobs(): Promise<Job[]> {
+  if (!db) return [];
+
   try {
     const jobsRef = ref(db, 'jobs');
     const snapshot = await get(jobsRef);
@@ -83,6 +85,8 @@ export async function fetchAllJobs(): Promise<Job[]> {
 }
 
 export async function getJobById(jobId: string): Promise<Job | null> {
+  if (!db) return null;
+
   try {
     const jobRef = ref(db, `jobs/${jobId}`);
     const snapshot = await get(jobRef);
@@ -95,6 +99,8 @@ export async function getJobById(jobId: string): Promise<Job | null> {
 }
 
 export async function applyForJob(application: JobApplication): Promise<{ success: boolean; message: string; applicationId?: string }> {
+  if (!db) return { success: false, message: 'Database not initialized' };
+
   try {
     if (!application.jobId || !application.firstName || !application.lastName || !application.email || !application.message) {
       return { success: false, message: 'Missing required fields.' };
@@ -112,6 +118,8 @@ export async function applyForJob(application: JobApplication): Promise<{ succes
 }
 
 export async function getUserApplications(userEmail: string): Promise<JobApplication[]> {
+  if (!db) return [];
+
   try {
     const appsRef = ref(db, 'applications');
     const snapshot = await get(appsRef);
@@ -232,6 +240,8 @@ async function fetchFromArbeitnow(): Promise<Job[]> {
 }
 
 export async function syncJobsToFirebase(): Promise<number> {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     console.log('Starting job sync...');
     const [rokJobs, arbJobs] = await Promise.all([fetchFromRemoteOK(), fetchFromArbeitnow()]);
