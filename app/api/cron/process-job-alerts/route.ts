@@ -63,6 +63,11 @@ function calculateNextAlertDate(frequency: string): string {
  * Fetch all jobs from Firebase
  */
 async function fetchAvailableJobs(): Promise<Job[]> {
+    if (!db) {
+        console.error('Firebase DB not initialized');
+        return [];
+    }
+
     try {
         const dbRef = ref(db);
         const snapshot = await get(child(dbRef, 'jobs'));
@@ -267,6 +272,10 @@ export async function GET(request: NextRequest) {
     
     if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!db) {
+        return NextResponse.json({ error: 'Database not initialized' }, { status: 500 });
     }
 
     try {
