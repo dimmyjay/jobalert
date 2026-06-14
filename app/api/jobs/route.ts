@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ref, get, child } from 'firebase/database';
+import { ref, get, child, set } from 'firebase/database';
 import { db } from '@/lib/firebase';
 
 export async function GET(request: NextRequest) {
@@ -19,6 +19,13 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
+            );
+        }
+
+        if (!db) {
+            return NextResponse.json(
+                { error: 'Database not initialized' },
+                { status: 500 }
             );
         }
 
@@ -77,6 +84,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (!db) {
+            return NextResponse.json(
+                { error: 'Database not initialized' },
+                { status: 500 }
+            );
+        }
+
         const jobData = await request.json();
 
         // Validate required fields
@@ -91,7 +105,6 @@ export async function POST(request: NextRequest) {
         }
 
         // Add job to Firebase
-        const { set } = await import('firebase/database');
         const jobId = `job-${Date.now()}`;
         const dbRef = ref(db, `jobs/${jobId}`);
 
