@@ -38,6 +38,14 @@ export default function AccountPage() {
 
     // 🔒 Check authentication first
     useEffect(() => {
+        // Safety check: if auth is not initialized, stop loading and show error or redirect
+        if (!auth) {
+            console.error("Firebase Auth is not initialized.");
+            setAuthLoading(false);
+            setError("Authentication service unavailable.");
+            return;
+        }
+
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (!currentUser) {
                 // Not logged in, redirect to login
@@ -141,7 +149,9 @@ export default function AccountPage() {
 
     // Handle logout
     const handleLogout = async () => {
-        await signOut(auth);
+        if (auth) {
+            await signOut(auth);
+        }
         router.push('/login');
     };
 
