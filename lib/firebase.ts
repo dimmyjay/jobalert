@@ -12,31 +12,42 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Check if required config exists
-if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-  console.warn("⚠️ Firebase API Key is missing. Please check your .env.local or Vercel Environment Variables.");
-}
+let firebaseApp: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Database | null = null;
 
-let firebaseApp: FirebaseApp;
-let auth: Auth;
-let db: Database;
-
-try {
-  // Initialize Firebase only if config is present
-  if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-    firebaseApp = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+// Only initialize if we have an API key
+if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  try {
+    firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(firebaseApp);
     db = getDatabase(firebaseApp);
-  } else {
-    // Throw error during runtime if config is missing but code tries to use it
-    throw new Error("Firebase configuration is incomplete.");
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
   }
-} catch (error) {
-  console.error("Failed to initialize Firebase:", error);
-  // Create dummy instances to prevent build crashes in some environments, 
-  // though functionality will be broken until keys are added.
-  // In a real app, you might want to handle this more gracefully depending on your needs.
-  throw error; 
+} else {
+  // During build, if env vars are missing, we log a warning but DON'T throw.
+  // This allows the build to complete. The app will fail at runtime if keys are truly missing.
+  if (typeof window === 'undefined') {
+    console.warn("⚠️ Firebase Env Vars missing. Build will proceed, but app may not work locally.");
+  }
 }
 
+// Export safe accessors
+export const getFirebaseApp = () => {
+  if (!firebaseApp) throw new Error("Firebase not initialized. Check environment variables.");
+  return firebaseApp;
+};
+
+export const getAuthInstance = () => {
+  if (!auth) throw new Error("Auth not initialized. Check environment variables.");
+  return auth;
+};
+
+export const getDbInstance = () => {
+  if (!db) throw new Error("Database not initialized. Check environment variables.");
+  return db;
+};
+
+// For backward compatibility with existing imports
 export { firebaseApp, auth, db };
