@@ -41,6 +41,8 @@ interface Job {
  * Fetch all active subscriptions that are due for alerts
  */
 export async function getDueSubscriptions(): Promise<JobSubscription[]> {
+    if (!db) return [];
+
     try {
         const dbRef = ref(db);
         const snapshot = await get(child(dbRef, 'jobAlertSubscriptions'));
@@ -74,6 +76,8 @@ export async function getDueSubscriptions(): Promise<JobSubscription[]> {
  * Fetch all available jobs from your jobs database/API
  */
 export async function fetchAvailableJobs(): Promise<Job[]> {
+    if (!db) return [];
+
     try {
         // Option 1: Fetch from Firebase
         const dbRef = ref(db);
@@ -171,6 +175,8 @@ export async function updateSubscriptionAfterAlert(
     matchedJobIds: string[],
     nextAlertDate: string
 ): Promise<void> {
+    if (!db) throw new Error("Database not initialized");
+
     try {
         const dbRef = ref(db, `jobAlertSubscriptions/${subscriptionId}`);
         const snapshot = await get(dbRef);
