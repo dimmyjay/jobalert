@@ -68,6 +68,12 @@ export default function JobsPage() {
 
   // 1. REAL-TIME LISTENER EFFECT
   useEffect(() => {
+    if (!db) {
+        setError("Database connection unavailable.");
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
     const jobsRef = ref(db, 'jobs');
 
