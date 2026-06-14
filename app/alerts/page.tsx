@@ -141,6 +141,12 @@ export default function JobAlertsPage() {
                 const subscriptionId = searchParams.get('id');
                 if (!subscriptionId) return;
 
+                // Safety check for db
+                if (!db) {
+                    setErrors({ submit: 'Database connection unavailable.' });
+                    return;
+                }
+
                 setIsEditMode(true);
                 setEditingSubscriptionId(subscriptionId);
 
@@ -295,6 +301,11 @@ export default function JobAlertsPage() {
 
     // Save or update subscription after successful payment
     const handleSaveSubscription = async (paymentReference: string, pricingTier: PricingTier) => {
+        if (!db) {
+            setErrors({ submit: 'Database connection unavailable.' });
+            return;
+        }
+
         try {
             const subscriptionId = isEditMode && editingSubscriptionId 
                 ? editingSubscriptionId 
