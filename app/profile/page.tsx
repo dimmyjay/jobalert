@@ -34,6 +34,12 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+        console.error("Firebase Auth is not initialized.");
+        setLoading(false);
+        return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         router.push("/login");
@@ -41,6 +47,12 @@ export default function ProfilePage() {
       }
 
       setUser(currentUser);
+
+      if (!db) {
+          console.error("Firebase DB is not initialized.");
+          setLoading(false);
+          return;
+      }
 
       const snapshot = await get(ref(db, `users/${currentUser.uid}`));
 
@@ -66,7 +78,9 @@ export default function ProfilePage() {
   }, [router]);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    if (auth) {
+        await signOut(auth);
+    }
     router.push("/login");
   };
 
