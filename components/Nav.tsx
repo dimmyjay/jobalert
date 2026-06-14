@@ -41,6 +41,12 @@ export default function Nav() {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+        console.error("Firebase Auth is not initialized.");
+        setAuthLoading(false);
+        return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
@@ -51,7 +57,9 @@ export default function Nav() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      if (auth) {
+        await signOut(auth);
+      }
       setProfileOpen(false);
       setMobileOpen(false);
       router.push("/login");
