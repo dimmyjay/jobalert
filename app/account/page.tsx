@@ -60,7 +60,10 @@ export default function AccountPage() {
     // Load only the logged-in user's subscriptions
     useEffect(() => {
         if (!user) return;
-        if (!db) {
+        
+        // Use a local constant to satisfy TypeScript strictness regarding null checks in closures
+        const currentDb = db;
+        if (!currentDb) {
             setError("Database connection unavailable.");
             setLoading(false);
             return;
@@ -69,8 +72,7 @@ export default function AccountPage() {
         const loadSubscriptions = async () => {
             try {
                 setLoading(true);
-                // Now TypeScript knows db is not null because of the check above
-                const dbRef = ref(db);
+                const dbRef = ref(currentDb);
                 const snapshot = await get(child(dbRef, 'jobAlertSubscriptions'));
 
                 if (snapshot.exists()) {
