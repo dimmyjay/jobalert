@@ -43,6 +43,8 @@ export async function createPendingSubscription(data: {
   amount: number;
   paymentReference: string;
 }) {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     const subscriptionId = `pending-${data.paymentReference}`;
 
@@ -80,6 +82,8 @@ export async function createPendingSubscription(data: {
  * Confirm subscription after payment verification
  */
 export async function confirmSubscription(paymentReference: string) {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     const pendingRef = ref(db, PENDING_SUBSCRIPTIONS_PATH);
     const snapshot = await get(pendingRef);
@@ -161,6 +165,8 @@ export const activateSubscriptionByReference = confirmSubscription;
  * Get all subscriptions from Firebase Realtime Database
  */
 export async function getAllSubscriptions() {
+  if (!db) return [];
+
   try {
     const dbRef = ref(db);
     const snapshot = await get(child(dbRef, SUBSCRIPTIONS_PATH));
@@ -315,6 +321,8 @@ export async function updateSubscriptionAfterAlert(
   subscriptionId: string,
   newJobIds: string[]
 ) {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     const dbRef = ref(db, `${SUBSCRIPTIONS_PATH}/${subscriptionId}`);
     const snapshot = await get(dbRef);
@@ -352,6 +360,8 @@ export async function updateSubscriptionAfterAlert(
  * Update subscription data
  */
 export async function updateSubscription(subscriptionId: string, updates: any) {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     const dbRef = ref(db, `${SUBSCRIPTIONS_PATH}/${subscriptionId}`);
 
@@ -400,6 +410,8 @@ export async function deactivateSubscription(subscriptionId: string) {
  * Delete a subscription
  */
 export async function deleteSubscription(subscriptionId: string) {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     const dbRef = ref(db, `${SUBSCRIPTIONS_PATH}/${subscriptionId}`);
     await remove(dbRef);
@@ -416,6 +428,8 @@ export async function deleteSubscription(subscriptionId: string) {
  * Used by app/api/alerts/unsubscribe/route.ts
  */
 export async function unsubscribeSubscription(subscriptionId: string): Promise<void> {
+  if (!db) throw new Error("Database not initialized");
+
   try {
     const subscriptionRef = ref(db, `${SUBSCRIPTIONS_PATH}/${subscriptionId}`);
     
@@ -456,6 +470,8 @@ export async function getSubscriptionByEmail(email: string) {
  * Get subscription by ID
  */
 export async function getSubscriptionById(subscriptionId: string) {
+  if (!db) return null;
+
   try {
     const dbRef = ref(db);
     const snapshot = await get(
@@ -482,6 +498,8 @@ export async function getSubscriptionById(subscriptionId: string) {
 export async function getPendingSubscriptionByReference(
   paymentReference: string
 ) {
+  if (!db) return null;
+
   try {
     const dbRef = ref(db, PENDING_SUBSCRIPTIONS_PATH);
     const snapshot = await get(dbRef);
