@@ -34,6 +34,12 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
+    if (!auth) {
+        setError("Authentication service unavailable.");
+        setLoading(false);
+        return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
@@ -49,6 +55,11 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    if (!auth) {
+        setError("Authentication service unavailable.");
+        return;
+    }
+
     setGoogleLoading(true);
     setError("");
 
