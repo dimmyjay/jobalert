@@ -110,6 +110,10 @@ async function processScheduledAlerts(): Promise<{
   try {
     console.log('🔄 Starting scheduled alerts job...');
 
+    if (!db) {
+        throw new Error("Firebase Database is not initialized.");
+    }
+
     // Fetch all subscriptions from Firebase
     // Note: Ensure this path matches your database structure (jobAlertSubscriptions vs subscriptions)
     const dbRef = ref(db);
