@@ -9,6 +9,9 @@ import { Zap, CheckCircle2, Lock, AlertCircle, Home } from 'lucide-react';
 import Nav from '@/components/Nav';
 import { JOB_ROLES, JOB_ROLES_BY_CATEGORY } from '@/lib/jobRoles';
 
+// Force dynamic rendering to avoid prerender errors with useSearchParams and browser APIs
+export const dynamic = 'force-dynamic';
+
 interface SubscriptionForm {
     email: string;
     keywords: string[]; // Now job role IDs
@@ -120,6 +123,7 @@ export default function JobAlertsPage() {
     const [selectedPlan, setSelectedPlan] = useState<'hourly' | 'daily' | 'weekly' | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingSubscriptionId, setEditingSubscriptionId] = useState<string | null>(null);
+    const [isClient, setIsClient] = useState(false);
 
     const [form, setForm] = useState<SubscriptionForm>({
         email: '',
@@ -134,8 +138,15 @@ export default function JobAlertsPage() {
         isActive: true,
     });
 
+    // Ensure we are on the client side
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
     // Load existing subscription if user is editing
     useEffect(() => {
+        if (!isClient) return;
+
         const loadSubscription = async () => {
             try {
                 const subscriptionId = searchParams.get('id');
@@ -176,10 +187,12 @@ export default function JobAlertsPage() {
         };
 
         loadSubscription();
-    }, [searchParams]);
+    }, [searchParams, isClient]);
 
     // Initialize Paystack script
     useEffect(() => {
+        if (!isClient) return;
+
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         document.body.appendChild(script);
@@ -188,7 +201,7 @@ export default function JobAlertsPage() {
                 document.body.removeChild(script);
             }
         };
-    }, []);
+    }, [isClient]);
 
     // Validation
     const validateForm = (): boolean => {
@@ -497,6 +510,10 @@ export default function JobAlertsPage() {
                 role.id.toLowerCase().includes(roleSearchQuery.toLowerCase())
         )
         : JOB_ROLES;
+
+    if (!isClient) {
+        return null; // Or a loading skeleton
+    }
 
     return (
         <>
