@@ -394,6 +394,7 @@ export default function JobsPage() {
       <div className="relative min-h-screen overflow-hidden bg-zinc-950 text-white pt-28 pb-20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.15),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.15),transparent_35%)]" />
         
+        {/* Added max-w-7xl and mx-auto to center content and prevent overflow */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -568,30 +569,30 @@ export default function JobsPage() {
                     return (
                       <div
                         key={job.id}
-                        className="group rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition cursor-pointer hover:-translate-y-1 hover:border-yellow-400/50 hover:bg-white/[0.08] hover:shadow-2xl hover:shadow-yellow-400/20"
+                        className="group rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition cursor-pointer hover:-translate-y-1 hover:border-yellow-400/50 hover:bg-white/[0.08] hover:shadow-2xl hover:shadow-yellow-400/20 overflow-hidden"
                         onClick={() => handleJobClick(job)}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0"> {/* Added min-w-0 to prevent flex item overflow */}
                             <div className="flex items-center gap-2 mb-1">
                               <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${source.color}`}>
                                 {source.label}
                               </span>
                             </div>
-                            <h3 className="text-xl font-bold group-hover:text-yellow-300 transition">
+                            <h3 className="text-xl font-bold group-hover:text-yellow-300 transition truncate">
                               {job.title}
                             </h3>
-                            <p className="text-yellow-300 font-semibold">{job.company}</p>
+                            <p className="text-yellow-300 font-semibold truncate">{job.company}</p>
                           </div>
                           <ArrowRight size={20} className="text-gray-400 group-hover:text-yellow-300 transition opacity-0 group-hover:opacity-100 ml-4 flex-shrink-0" />
                         </div>
 
-                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">{job.description}</p>
+                        <p className="text-gray-400 text-sm mb-4 line-clamp-2 break-words">{job.description}</p>
 
                         <div className="flex flex-wrap gap-3 items-center mb-4">
                           <div className="flex items-center gap-1 text-sm text-gray-300 bg-white/5 px-3 py-1 rounded-full">
                             <MapPin size={16} className="text-blue-400" />
-                            {job.location}
+                            <span className="truncate max-w-[150px]">{job.location}</span>
                           </div>
                           <div className="flex items-center gap-1 text-sm text-gray-300 bg-white/5 px-3 py-1 rounded-full">
                             <Briefcase size={16} className="text-green-400" />
@@ -849,7 +850,7 @@ export default function JobsPage() {
                   )}
 
                   <div className="bg-white/[0.02] border border-white/10 rounded-lg p-4">
-                    <p className="text-gray-300 whitespace-pre-wrap leading-relaxed text-sm">
+                    <p className="text-gray-300 whitespace-pre-wrap leading-relaxed text-sm break-words">
                       {isTranslating ? (
                         <span className="inline-flex items-center gap-2 text-gray-500">
                           <Loader2 size={16} className="animate-spin" />
