@@ -9,26 +9,11 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 const navLinks = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Browse Jobs",
-    href: "/jobs",
-  },
-  {
-    label: "Job Alerts",
-    href: "/alerts",
-  },
-  {
-    label: "Career Tips",
-    href: "/career-tips",
-  },
-  {
-    label: "Contact",
-    href: "/contact",
-  },
+  { label: "Home", href: "/" },
+  { label: "Browse Jobs", href: "/jobs", protected: true },
+  { label: "Job Alerts", href: "/alerts", protected: true },
+  { label: "Career Tips", href: "/career-tips" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Nav() {
@@ -41,12 +26,6 @@ export default function Nav() {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth) {
-        console.error("Firebase Auth is not initialized.");
-        setAuthLoading(false);
-        return;
-    }
-
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
@@ -55,11 +34,24 @@ export default function Nav() {
     return () => unsubscribe();
   }, []);
 
+  const handleProtectedLink = (
+    href: string,
+    isProtected?: boolean
+  ) => {
+    setMobileOpen(false);
+    setProfileOpen(false);
+
+    if (isProtected && !user) {
+      router.push(`/login?redirect=${href}`);
+      return;
+    }
+
+    router.push(href);
+  };
+
   const handleLogout = async () => {
     try {
-      if (auth) {
-        await signOut(auth);
-      }
+      await signOut(auth);
       setProfileOpen(false);
       setMobileOpen(false);
       router.push("/login");
@@ -68,16 +60,13 @@ export default function Nav() {
     }
   };
 
-  const userName =
-    user?.displayName || user?.email?.split("@")[0] || "User";
-
+  const userName = user?.displayName || user?.email?.split("@")[0] || "User";
   const userPhoto = user?.photoURL || "";
 
   return (
     <>
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <BellRing className="h-7 w-7 text-yellow-400" />
             <span className="text-xl font-extrabold text-white">
@@ -85,7 +74,6 @@ export default function Nav() {
             </span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden items-center gap-8 lg:flex">
             {navLinks.map((link) => {
               const active =
@@ -93,9 +81,11 @@ export default function Nav() {
                 pathname.startsWith(`${link.href}/`);
 
               return (
-                <Link
+                <button
                   key={link.href}
-                  href={link.href}
+                  onClick={() =>
+                    handleProtectedLink(link.href, link.protected)
+                  }
                   className={`text-sm font-medium transition ${
                     active
                       ? "text-yellow-400"
@@ -103,12 +93,11 @@ export default function Nav() {
                   }`}
                 >
                   {link.label}
-                </Link>
+                </button>
               );
             })}
           </div>
 
-          {/* Desktop Auth Area */}
           <div className="hidden items-center gap-3 lg:flex">
             {authLoading ? (
               <div className="h-10 w-28 animate-pulse rounded-full bg-white/10" />
@@ -160,21 +149,19 @@ export default function Nav() {
                       </div>
                     </div>
 
-                    <Link
-                      href="/profile"
-                      onClick={() => setProfileOpen(false)}
-                      className="block rounded-xl px-4 py-3 text-sm text-white transition hover:bg-white/10"
+                    <button
+                      onClick={() => handleProtectedLink("/profile", true)}
+                      className="block w-full rounded-xl px-4 py-3 text-left text-sm text-white transition hover:bg-white/10"
                     >
                       My Profile
-                    </Link>
+                    </button>
 
-                    <Link
-                      href="/alerts"
-                      onClick={() => setProfileOpen(false)}
-                      className="block rounded-xl px-4 py-3 text-sm text-white transition hover:bg-white/10"
+                    <button
+                      onClick={() => handleProtectedLink("/alerts", true)}
+                      className="block w-full rounded-xl px-4 py-3 text-left text-sm text-white transition hover:bg-white/10"
                     >
                       My Job Alerts
-                    </Link>
+                    </button>
 
                     <button
                       onClick={handleLogout}
@@ -205,7 +192,6 @@ export default function Nav() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-white lg:hidden"
@@ -215,53 +201,28 @@ export default function Nav() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="fixed inset-x-0 top-[73px] z-40 border-b border-white/10 bg-zinc-950 lg:hidden">
           <div className="space-y-2 px-4 py-6">
-            {user && (
-              <div className="mb-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                {userPhoto ? (
-                  <Image
-                    src={userPhoto}
-                    alt={userName}
-                    width={44}
-                    height={44}
-                    className="h-11 w-11 rounded-full object-cover"
-                  />
-                ) : (
-                  <UserCircle className="h-11 w-11 text-yellow-400" />
-                )}
-
-                <div className="min-w-0">
-                  <p className="truncate font-bold text-white">
-                    {userName}
-                  </p>
-                  <p className="truncate text-xs text-gray-400">
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-            )}
-
             {navLinks.map((link) => {
               const active =
                 pathname === link.href ||
                 pathname.startsWith(`${link.href}/`);
 
               return (
-                <Link
+                <button
                   key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block rounded-xl px-4 py-3 text-sm font-medium transition ${
+                  onClick={() =>
+                    handleProtectedLink(link.href, link.protected)
+                  }
+                  className={`block w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
                     active
                       ? "bg-yellow-400 text-black"
                       : "text-white hover:bg-white/10"
                   }`}
                 >
                   {link.label}
-                </Link>
+                </button>
               );
             })}
 
@@ -270,13 +231,12 @@ export default function Nav() {
                 <div className="h-12 animate-pulse rounded-xl bg-white/10" />
               ) : user ? (
                 <>
-                  <Link
-                    href="/profile"
-                    onClick={() => setMobileOpen(false)}
+                  <button
+                    onClick={() => handleProtectedLink("/profile", true)}
                     className="rounded-xl border border-white/20 px-4 py-3 text-center text-white"
                   >
                     My Profile
-                  </Link>
+                  </button>
 
                   <button
                     onClick={handleLogout}
